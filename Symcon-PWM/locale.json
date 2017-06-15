@@ -1,0 +1,8 @@
+{
+	"translations": {
+		"de": { 
+			"Sensor": "Ist-Wert",
+			"*Select the Variable holding the Value for the current Temperature": "Wähle die Variable für die momentane Temperatur aus"
+		}
+	}
+}

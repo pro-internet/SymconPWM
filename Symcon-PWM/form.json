@@ -1,0 +1,42 @@
+{
+  "elements":
+  [
+	{
+		"type": "List",
+		"name": "Raeume",
+		"caption": "Räume:",
+		"rowCount": 5,
+		"add": true,
+		"delete": true,
+		"sort": {
+			"column": "name",
+			"direction": "ascending"
+		},
+		"columns": [{
+			"label": "Raumname",
+			"name": "Raumname", 
+			"width": "75px",
+			"add": "",
+			"edit": {
+				"type": "ValidationTextBox"
+			}
+		}, {
+			"label": "Stellmotor",
+			"name": "Stellmotor",
+			"width": "75px",
+			"add": 0,
+			"edit": {
+				"type": "SelectInstance"
+			}
+		}, {
+			"label": "Ist-wert",
+			"name": "Istwert",
+			"width": "75px",
+			"add": 0,
+			"edit": {
+				"type": "SelectVariable"
+			}
+		}]
+	}
+  ]
+}
