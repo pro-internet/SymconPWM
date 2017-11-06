@@ -462,12 +462,8 @@ if (\$IPS_SENDER == \"WebFront\")
 		$var['oeffnungszeit'] = GetValue(IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID));
 		if($var['trigger'] == 0)
 				$var['trigger'] = 0.1;
-		for($i = 0; $i < count($data); $i++)
-		{
-			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
-			$var['istwert'] = GetValue($data[$i]->Istwert);
-			$var['sollwert'] = GetValue(IPS_GetObjectIDByIdent("SollwertVar", $insID));
-			
+
+		//refresh timer
 			$eName = "Nächste Aktuallisierung";
 			$eIdent = "refreshTimer";
 			$eScript = "PWM_refresh(". $this->InstanceID .");";
@@ -476,6 +472,12 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $var['interval'] * 60);
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
+
+		for($i = 0; $i < count($data); $i++)
+		{
+			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+			$var['istwert'] = GetValue($data[$i]->Istwert);
+			$var['sollwert'] = GetValue(IPS_GetObjectIDByIdent("SollwertVar", $insID));
 			
 			$temperaturDifferenz = $var['sollwert'] - $var['istwert'];
 			$oeffnungszeit_prozent = $temperaturDifferenz / $var['trigger'];
@@ -486,18 +488,18 @@ if (\$IPS_SENDER == \"WebFront\")
 				//For Variable input
 				////$this->setValueHeating(false, $data[$i]->Stellmotor);
 				//just for KNX Devices
-				EIB_Switch($data[$i]->Stellmotor, false);
-				
+				@EIB_Switch($data[$i]->Stellmotor, false);
+				SetValue(IPS_GetChildrenIDs($data[$i]->Stellmotor)[0], 0);
 				//"Heizung Stellmotor zu!";
 			}
 			else
 			{
-				echo "test";
 				//For Variable input
 				///$this->setValueHeating(true, $data[$i]->Stellmotor);
 				//just for KNX Devices
-				EIB_Switch($data[$i]->Stellmotor, true);
-				
+				@EIB_Switch($data[$i]->Stellmotor, true);
+				SetValue(IPS_GetChildrenIDs($data[$i]->Stellmotor)[0], 1);
+
 				$eName = "Stellmotor aus";
 				$eIdent = "heatingOffTimer";
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
@@ -517,12 +519,25 @@ if (\$IPS_SENDER == \"WebFront\")
 		//for variable input
 		////$this->setValueHeating(false, $target); //stellmotor aus
 		//just for KNX Devices
-		EIB_Switch($target, false);
-		
-		if(@IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID) !== false)
+		@EIB_Switch($target, false);
+		SetValue(IPS_GetChildrenIDs($target)[0], 0);
+
+		$data = json_decode($this->ReadPropertyString("Raeume"), true);
+		foreach($data as $i => $entry)
 		{
-			$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $this->InstanceID);
-			IPS_DeleteEvent($eid);
+			if($entry['Stellmotor'] == $target)
+			{
+				if(@IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID)) !== false)
+				{
+					$roomID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+					if(@IPS_GetObjectIDByIdent("heatingOffTimer", $roomID) !== false)
+					{
+						$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $roomID);
+						IPS_SetEventActive($eid, false);
+						@IPS_DeleteEvent($eid);
+					}
+				}
+			}
 		}
 	}
 }
