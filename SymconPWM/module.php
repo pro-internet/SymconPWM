@@ -488,8 +488,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				//For Variable input
 				////$this->setValueHeating(false, $data[$i]->Stellmotor);
 				//just for KNX Devices
-				@EIB_Switch($data[$i]->Stellmotor, false);
-				SetValue(IPS_GetChildrenIDs($data[$i]->Stellmotor)[0], 0);
+				EIB_Switch($data[$i]->Stellmotor, false);
 				//"Heizung Stellmotor zu!";
 			}
 			else
@@ -497,14 +496,12 @@ if (\$IPS_SENDER == \"WebFront\")
 				//For Variable input
 				///$this->setValueHeating(true, $data[$i]->Stellmotor);
 				//just for KNX Devices
-				@EIB_Switch($data[$i]->Stellmotor, true);
-				SetValue(IPS_GetChildrenIDs($data[$i]->Stellmotor)[0], 1);
+				EIB_Switch($data[$i]->Stellmotor, true);
 
 				$eName = "Stellmotor aus";
 				$eIdent = "heatingOffTimer";
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
 				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
-				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
