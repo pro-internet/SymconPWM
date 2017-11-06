@@ -516,8 +516,7 @@ if (\$IPS_SENDER == \"WebFront\")
 		//for variable input
 		////$this->setValueHeating(false, $target); //stellmotor aus
 		//just for KNX Devices
-		@EIB_Switch($target, false);
-		SetValue(IPS_GetChildrenIDs($target)[0], 0);
+		EIB_Switch($target, false);
 
 		$data = json_decode($this->ReadPropertyString("Raeume"), true);
 		foreach($data as $i => $entry)
