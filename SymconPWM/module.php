@@ -512,6 +512,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			if(@IPS_GetObjectIDByIdent("heatingOffTimer", $insID) !== false)
 			{
 				$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $insID);
+				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
 				
 			}
