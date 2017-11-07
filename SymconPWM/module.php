@@ -468,7 +468,6 @@ if (\$IPS_SENDER == \"WebFront\")
 			$eIdent = "refreshTimer";
 			$eScript = "PWM_refresh(". $this->InstanceID .");";
 			$eid = $this->CreateTimer($eName, $eIdent, $eScript);
-			IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $var['interval'] * 60);
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
@@ -512,9 +511,7 @@ if (\$IPS_SENDER == \"WebFront\")
 			if(@IPS_GetObjectIDByIdent("heatingOffTimer", $insID) !== false)
 			{
 				$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $insID);
-				IPS_SetEventCyclicTimeFrom($eid, (int)date("H"), (int)date("i"), (int)date("s"));
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
-				
 			}
 		}
 	}
@@ -538,7 +535,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					{
 						$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $roomID);
 						IPS_SetEventActive($eid, false);
-						@IPS_DeleteEvent($eid);
+						//@IPS_DeleteEvent($eid);
 					}
 				}
 			}
