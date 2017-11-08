@@ -468,6 +468,16 @@ if (\$IPS_SENDER == \"WebFront\")
 			$eIdent = "refreshTimer";
 			$eScript = "PWM_refresh(". $this->InstanceID .");";
 			$eid = $this->CreateTimer($eName, $eIdent, $eScript);
+			//check if the next refresh is tomorrow
+			if(date('H') == 23 && date('i') > (59 - $var['interval']))
+			{
+				$nextDayOffset = round(date('i') + $var['interval'] - 60);
+				IPS_SetEventCyclicTimeFrom($eid, 0, $nextDayOffset, 0);
+			}
+			else
+			{
+				IPS_SetEventCyclicTimeFrom($eid, date('H'), date('i'), date('s'));
+			}
 			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $var['interval'] * 60);
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
@@ -501,6 +511,16 @@ if (\$IPS_SENDER == \"WebFront\")
 				$eIdent = "heatingOffTimer";
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
 				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
+				//check if the next refresh is tomorrow
+				if(date('H') == 23 && date('i') > (59 - $var['interval']))
+				{
+					$nextDayOffset = round(date('i') + $var['interval'] - 60);
+					IPS_SetEventCyclicTimeFrom($eid, 0, $nextDayOffset, 0);
+				}
+				else
+				{
+					IPS_SetEventCyclicTimeFrom($eid, date('H'), date('i'), date('s'));
+				}
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
 				IPS_SetEventActive($eid, true);
 				IPS_SetHidden($eid, false);
@@ -511,6 +531,16 @@ if (\$IPS_SENDER == \"WebFront\")
 			if(@IPS_GetObjectIDByIdent("heatingOffTimer", $insID) !== false)
 			{
 				$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $insID);
+				//check if the next refresh is tomorrow
+				if(date('H') == 23 && date('i') > (59 - $var['interval']))
+				{
+					$nextDayOffset = round(date('i') + $var['interval'] - 60);
+					IPS_SetEventCyclicTimeFrom($eid, 0, $nextDayOffset, 0);
+				}
+				else
+				{
+					IPS_SetEventCyclicTimeFrom($eid, date('H'), date('i'), date('s'));
+				}
 				IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
 			}
 		}
