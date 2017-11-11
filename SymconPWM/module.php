@@ -116,7 +116,16 @@ class PWM extends IPSModule {
 			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Komfort", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Reduziert", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Solar/PV", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", -1);
+			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", '');
+		}
+
+		//Swtich Profil erstellen
+		if(!IPS_VariableProfileExists("Switch"))
+		{
+			IPS_CreateVariableProfile("Switch", 0);
+			IPS_SetVariableProfileAssociation("Switch", false, "Aus", "", -1);
+			IPS_SetVariableProfileAssociation("Switch", true, "An", "", 0x8000FF);
+			IPS_SetVariableProfileIcon("Switch", 'Power');
 		}
 		
 		//SetValueScript erstellen
@@ -268,12 +277,19 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$vid = $this->CreateVariable(2,"Soll", "SollwertVar", "PWM.Celsius", 0, $insID);
 					IPS_SetPosition($vid, 1);
+					$archivGUID = $this->GetModuleIDByName("Archive Control");
+					$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
+					AC_SetLoggingStatus($archivIDs[0], $vid, true);
 				}
 				else
 				{
 					$vid = IPS_GetObjectIDByIdent("SollwertVar", $insID);
 				}
-				
+				//archiv auf den Sollwert einbinden
+				$archivGUID = $this->GetModuleIDByName("Archive Control");
+				$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
+				AC_SetLoggingStatus($archivIDs[0], $vid, true);
+
 				//Soll-Wert onChange Event
 				if(@IPS_GetObjectIDByIdent("SollwertOnChange", $insID) === false)
 				{
@@ -299,7 +315,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					$lid = IPS_GetObjectIDByIdent("IstwertLink",$insID);
 				}
 				IPS_SetLinkTargetID($lid, $list->Istwert);
-				IPS_SetName($lid, IPS_GetName($list->Istwert));
+				IPS_SetName($lid, "Ist");
 				IPS_SetPosition($lid, 0);
 				
 				//Ist-Wert onChange Event
@@ -366,6 +382,17 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetPosition($vid, 5);
 					SetValue($vid, 21);
 				}
+
+				//Automatik switch erstellen
+				if(@IPS_GetObjectIDByIdent('AutomatikVar', $insID) === false)
+				{
+					$vid = $this->CreateVariable(0, 'Automatik', 'AutomatikVar', 'Switch', $sid, $insID, -9999, true);
+				}
+				else
+				{
+					$vid = IPS_GetObjectIDByIdent('AutomatikVar', $insID);
+				}
+				AC_SetLoggingStatus($archivIDs[0], $vid, true);
 			}
 			//lösche überschüssige räume
 			while($i < count(IPS_GetChildrenIDs(IPS_GetParent($this->InstanceID))))
@@ -419,7 +446,7 @@ if (\$IPS_SENDER == \"WebFront\")
 	////////////////////
 	//public functions//
 	////////////////////
-	public function selectorOnChange()
+	public function selectorOnChange($sender = null)
 	{
 		$selectorID = IPS_GetObjectIDByIdent("SelectorVar", $this->InstanceID);
 		switch(GetValue($selectorID))
@@ -450,10 +477,10 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventTrigger($eid, 1, $sollSzene);
 		}
 		
-		$this->refresh();
+		$this->refresh($sender);
 	}
 	
-	public function refresh()
+	public function refresh($sender = null)
 	{
 		$data = json_decode($this->ReadPropertyString("Raeume"));
 		$var = array();
@@ -511,6 +538,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				$eIdent = "heatingOffTimer";
 				$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
 				$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
+				IPS_SetIcon($eid, 'Clock');
+
 				//check if the next refresh is tomorrow
 				if(date('H') == 23 && date('i') > (59 - $var['interval']))
 				{
@@ -570,6 +599,21 @@ if (\$IPS_SENDER == \"WebFront\")
 				}
 			}
 		}
+	}
+	private function GetModuleIDByName($name = "Dummy Module")
+	{
+		$moduleList = IPS_GetModuleList();
+		$GUID = ""; //init
+		foreach($moduleList as $l)
+		{
+			if(IPS_GetModule($l)['ModuleName'] == $name)
+			{
+				$GUID = $l;
+				break;
+			}
+		}
+		
+		return $GUID;
 	}
 }
 ?>
