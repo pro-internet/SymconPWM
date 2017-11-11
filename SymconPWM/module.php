@@ -446,7 +446,7 @@ if (\$IPS_SENDER == \"WebFront\")
 	////////////////////
 	//public functions//
 	////////////////////
-	public function selectorOnChange($sender = null)
+	public function selectorOnChange()
 	{
 		$selectorID = IPS_GetObjectIDByIdent("SelectorVar", $this->InstanceID);
 		switch(GetValue($selectorID))
@@ -477,10 +477,10 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventTrigger($eid, 1, $sollSzene);
 		}
 		
-		$this->refresh($sender);
+		$this->refresh();
 	}
 	
-	public function refresh($sender = null)
+	public function refresh()
 	{
 		$data = json_decode($this->ReadPropertyString("Raeume"));
 		$var = array();
