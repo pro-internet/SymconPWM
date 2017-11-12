@@ -145,6 +145,10 @@ if (\$IPS_SENDER == \"WebFront\")
 
 ?>");
 		}
+		else
+		{
+			$sid = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+		}
 		
 		//Trigger Variable erstellen
 		if(@IPS_GetObjectIDByIdent("TriggerVar",$this->InstanceID) === false)
@@ -299,8 +303,13 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetName($eid, "Sollwert onChange");
 					IPS_SetIdent($eid, "SollwertOnChange");
 					IPS_SetEventTrigger($eid, 1, $vid);
-					IPS_SetEventScript($eid, "PWM_selectorOnChange(". $this->InstanceID .");");
+					IPS_SetEventScript($eid, "PWM_refreshSollwertRoom(". $this->InstanceID .", $i);");
 					IPS_SetEventActive($eid, true);
+				}
+				else
+				{
+					$eid = IPS_GetObjectIDByIdent("SollwertOnChange", $insID);
+					IPS_SetEventScript($eid, "PWM_refreshSollwertRoom(". $this->InstanceID .", $i);");
 				}
 				
 				//Ist-Wert Link erstellen
@@ -600,6 +609,12 @@ if (\$IPS_SENDER == \"WebFront\")
 			}
 		}
 	}
+
+	public function refreshSollwertRoom($room)
+	{
+		echo "exec";
+	}
+
 	private function GetModuleIDByName($name = "Dummy Module")
 	{
 		$moduleList = IPS_GetModuleList();
