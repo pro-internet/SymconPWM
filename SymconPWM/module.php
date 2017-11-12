@@ -612,7 +612,76 @@ if (\$IPS_SENDER == \"WebFront\")
 
 	public function refreshSollwertRoom($room)
 	{
-		echo "exec";
+		$data = json_decode($this->ReadPropertyString("Raeume"));
+		$var = array();
+		$var['trigger'] = GetValue(IPS_GetObjectIDByIdent("TriggerVar", $this->InstanceID));
+		$var['interval'] = GetValue(IPS_GetObjectIDByIdent("IntervalVar", $this->InstanceID));
+		$var['oeffnungszeit'] = GetValue(IPS_GetObjectIDByIdent("OeffnungszeitVar", $this->InstanceID));
+		if($var['trigger'] == 0)
+				$var['trigger'] = 0.1;
+
+		$i = $room;
+		$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
+		$var['istwert'] = GetValue($data[$i]->Istwert);
+		$var['sollwert'] = GetValue(IPS_GetObjectIDByIdent("SollwertVar", $insID));
+		
+		$temperaturDifferenz = $var['sollwert'] - $var['istwert'];
+		$oeffnungszeit_prozent = $temperaturDifferenz / $var['trigger'];
+		$oeffnungszeit = $oeffnungszeit_prozent * $var['interval']; //Öffnungszeit in Minuten
+		
+		if($oeffnungszeit <= $var['oeffnungszeit'] && $temperaturDifferenz < $var['trigger'])
+		{
+			//For Variable input
+			////$this->setValueHeating(false, $data[$i]->Stellmotor);
+			//just for KNX Devices
+			EIB_Switch($data[$i]->Stellmotor, false);
+			//"Heizung Stellmotor zu!";
+		}
+		else
+		{
+			//For Variable input
+			///$this->setValueHeating(true, $data[$i]->Stellmotor);
+			//just for KNX Devices
+			EIB_Switch($data[$i]->Stellmotor, true);
+
+			$eName = "Stellmotor aus";
+			$eIdent = "heatingOffTimer";
+			$eScript = "PWM_heatingOff(". $this->InstanceID . "," . $data[$i]->Stellmotor .");";
+			$eid = $this->CreateTimer($eName, $eIdent, $eScript, $insID);
+			IPS_SetIcon($eid, 'Clock');
+
+			//check if the next refresh is tomorrow
+			if(date('H') == 23 && date('i') > (59 - $var['interval']))
+			{
+				$nextDayOffset = round(date('i') + $var['interval'] - 60);
+				IPS_SetEventCyclicTimeFrom($eid, 0, $nextDayOffset, 0);
+			}
+			else
+			{
+				IPS_SetEventCyclicTimeFrom($eid, date('H'), date('i'), date('s'));
+			}
+			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
+			IPS_SetEventActive($eid, true);
+			IPS_SetHidden($eid, false);
+			
+			//"Heizung Stellmotor auf für $oeffnungszeit Minuten";
+		}
+
+		if(@IPS_GetObjectIDByIdent("heatingOffTimer", $insID) !== false)
+		{
+			$eid = IPS_GetObjectIDByIdent("heatingOffTimer", $insID);
+			//check if the next refresh is tomorrow
+			if(date('H') == 23 && date('i') > (59 - $var['interval']))
+			{
+				$nextDayOffset = round(date('i') + $var['interval'] - 60);
+				IPS_SetEventCyclicTimeFrom($eid, 0, $nextDayOffset, 0);
+			}
+			else
+			{
+				IPS_SetEventCyclicTimeFrom($eid, date('H'), date('i'), date('s'));
+			}
+			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $oeffnungszeit * 60 + 5);
+		}
 	}
 
 	private function GetModuleIDByName($name = "Dummy Module")
