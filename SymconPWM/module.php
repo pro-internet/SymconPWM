@@ -357,8 +357,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$lid = IPS_GetObjectIDByIdent("StellmotorLink",$insID);
 				}
-				$statusVarID = IPS_GetChildrenIDs($list->Stellmotor);
-				IPS_SetLinkTargetID($lid, $statusVarID[0]);
+				$statusVarID = @IPS_GetChildrenIDs($list->Stellmotor);
+				@IPS_SetLinkTargetID($lid, $statusVarID[0]);
 				IPS_SetName($lid, "Stellmotor");
 				IPS_SetPosition($lid, 98);
 				
