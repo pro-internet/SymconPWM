@@ -411,6 +411,10 @@ if (\$IPS_SENDER == \"WebFront\")
 				if(@IPS_GetObjectIDByIdent('AutomatikEvent', $insID) === false)
 				{
 					$eid = IPS_CreateEvent(0 /*trigger*/);
+					IPS_SetParent($eid, $insID);
+					IPS_SetName($eid, "Sperre onChange");
+					IPS_SetPosition($eid, 100);
+					IPS_SetIdent($eid, $AutomatikEvent);
 					IPS_SetEventTrigger($eid, 1 /*on Change*/, $vid);
 					IPS_SetEventScript($eid, 'if($_IPS["VALUE"] === false)
 											  {
