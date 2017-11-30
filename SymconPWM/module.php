@@ -430,6 +430,7 @@ if (\$IPS_SENDER == \"WebFront\")
 											  {
 												  PWM_refreshSollwertRoom('. $this->InstanceID .', '. $i .');
 											  }');
+					IPS_SetEventActive($eid, true);
 				}
 				else
 				{
