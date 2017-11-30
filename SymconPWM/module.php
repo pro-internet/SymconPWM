@@ -1,6 +1,8 @@
 <?
 class PWM extends IPSModule {
 	
+	//master branch
+
 	protected function CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "", $suffix = "", $icon = "")
 	{
 		IPS_CreateVariableProfile($profile, $type);
@@ -355,8 +357,8 @@ if (\$IPS_SENDER == \"WebFront\")
 				{
 					$lid = IPS_GetObjectIDByIdent("StellmotorLink",$insID);
 				}
-				$statusVarID = IPS_GetChildrenIDs($list->Stellmotor);
-				IPS_SetLinkTargetID($lid, $statusVarID[0]);
+				$statusVarID = @IPS_GetChildrenIDs($list->Stellmotor);
+				@IPS_SetLinkTargetID($lid, $statusVarID[0]);
 				IPS_SetName($lid, "Stellmotor");
 				IPS_SetPosition($lid, 98);
 				
@@ -403,6 +405,37 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetName($vid, 'Sperre');
 				}
 				AC_SetLoggingStatus($archivIDs[0], $vid, true);
+
+				//Sperre event
+				//Sperre switch erstellen
+				if(@IPS_GetObjectIDByIdent('AutomatikEvent', $insID) === false)
+				{
+					$eid = IPS_CreateEvent(0 /*trigger*/);
+					IPS_SetParent($eid, $insID);
+					IPS_SetName($eid, "Sperre onChange");
+					IPS_SetPosition($eid, 100);
+					IPS_SetIdent($eid, "AutomatikEvent");
+					IPS_SetEventTrigger($eid, 1 /*on Change*/, $vid);
+					IPS_SetEventScript($eid, 'if($_IPS["VALUE"] === true)
+											  {
+												  $target = '. $list->Stellmotor .';
+												  PWM_heatingOff('. $this->InstanceID .', $target);
+												  $hotID = @IPS_GetObjectIDByIdent("heatingOffTimer", IPS_GetParent($_IPS["EVENT"]));  
+												  if($hotID > 9999)
+												  {
+													  IPS_DeleteEvent($hotID);
+												  }
+											  }
+											  else
+											  {
+												  PWM_refreshSollwertRoom('. $this->InstanceID .', '. $i .');
+											  }');
+					IPS_SetEventActive($eid, true);
+				}
+				else
+				{
+					$eid = IPS_GetObjectIDByIdent('AutomatikEvent', $insID);
+				}
 			}
 			//lösche überschüssige räume
 			while($i < count(IPS_GetChildrenIDs(IPS_GetParent($this->InstanceID))))
