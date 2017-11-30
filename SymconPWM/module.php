@@ -416,7 +416,7 @@ if (\$IPS_SENDER == \"WebFront\")
 					IPS_SetPosition($eid, 100);
 					IPS_SetIdent($eid, "AutomatikEvent");
 					IPS_SetEventTrigger($eid, 1 /*on Change*/, $vid);
-					IPS_SetEventScript($eid, 'if($_IPS["VALUE"] === false)
+					IPS_SetEventScript($eid, 'if($_IPS["VALUE"] === true)
 											  {
 												  $target = '. $list->Stellmotor .';
 												  PWM_heatingOff('. $this->InstanceID .', $target);
