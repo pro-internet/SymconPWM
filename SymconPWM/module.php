@@ -1,6 +1,8 @@
 <?
 class PWM extends IPSModule {
 	
+	//Test branch
+
 	protected function CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "", $suffix = "", $icon = "")
 	{
 		IPS_CreateVariableProfile($profile, $type);
@@ -392,14 +394,15 @@ if (\$IPS_SENDER == \"WebFront\")
 					SetValue($vid, 21);
 				}
 
-				//Automatik switch erstellen
+				//Sperre switch erstellen
 				if(@IPS_GetObjectIDByIdent('AutomatikVar', $insID) === false)
 				{
-					$vid = $this->CreateVariable(0, 'Automatik', 'AutomatikVar', 'Switch', $sid, $insID, -9999, true);
+					$vid = $this->CreateVariable(0, 'Sperre', 'AutomatikVar', 'Switch', $sid, $insID, -9999, false);
 				}
 				else
 				{
 					$vid = IPS_GetObjectIDByIdent('AutomatikVar', $insID);
+					IPS_SetName($vid, 'Sperre');
 				}
 				AC_SetLoggingStatus($archivIDs[0], $vid, true);
 			}
@@ -521,9 +524,9 @@ if (\$IPS_SENDER == \"WebFront\")
 		for($i = 0; $i < count($data); $i++)
 		{
 			$insID = IPS_GetObjectIDByIdent("Raum$i", IPS_GetParent($this->InstanceID));
-			$automatik = GetValue(IPS_GetObjectIDByIdent("AutomatikVar", $insID));
+			$sperre = GetValue(IPS_GetObjectIDByIdent("AutomatikVar", $insID));
 
-			if($automatik)
+			if(!$sperre)
 			{
 				$var['istwert'] = GetValue($data[$i]->Istwert);
 				$var['sollwert'] = GetValue(IPS_GetObjectIDByIdent("SollwertVar", $insID));
@@ -643,8 +646,8 @@ if (\$IPS_SENDER == \"WebFront\")
 
 		//refresh the room
 		$insID = IPS_GetObjectIDByIdent("Raum$room", IPS_GetParent($this->InstanceID));
-		$automatik = GetValue(IPS_GetObjectIDByIdent("AutomatikVar", $insID));
-		if(!$automatik) return;
+		$sperre = GetValue(IPS_GetObjectIDByIdent("AutomatikVar", $insID));
+		if($sperre) return;
 
 		$data = json_decode($this->ReadPropertyString("Raeume"));
 		$var = array();
