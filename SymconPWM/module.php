@@ -118,7 +118,7 @@ class PWM extends IPSModule {
 			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Komfort", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Reduziert", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Solar/PV", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", '');
+			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", -1);
 		}
 
 		//Swtich Profil erstellen
