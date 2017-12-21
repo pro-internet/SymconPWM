@@ -36,7 +36,6 @@ class PWM extends IPSModule {
 		if(@IPS_GetObjectIDByIdent($ident, $parent) === false)
 		{
 			$eid = IPS_CreateEvent(1 /*züklisch*/);
-			IPS_SetName($eid, $name);
 			IPS_SetParent($eid, $parent);
 			IPS_SetIdent($eid, $ident);
 			IPS_SetEventScript($eid, $script);
@@ -45,6 +44,7 @@ class PWM extends IPSModule {
 		{
 			$eid = IPS_GetObjectIDByIdent($ident, $parent);
 		}
+		IPS_SetName($eid, $name);
 		return $eid;
 	}
 
@@ -534,7 +534,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				$var['trigger'] = 0.1;
 
 		//refresh timer
-			$eName = "Nächste Aktuallisierung";
+			$eName = "Nächste Aktualisierung";
 			$eIdent = "refreshTimer";
 			$eScript = "PWM_refresh(". $this->InstanceID .");";
 			$eid = $this->CreateTimer($eName, $eIdent, $eScript);
