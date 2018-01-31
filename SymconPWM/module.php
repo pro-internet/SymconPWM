@@ -551,6 +551,26 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $var['interval'] * 60);
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
+		
+		//add a timer that resets the weird issue with wrong offsets of time for the refresh timer
+			if(@IPS_GetObjectIDByIdent('resetRefreshTimer', $this->InstanceID) === false)
+			{	
+				$reseteid = IPS_CreateEvent(1 /*züklisch*/);
+				IPS_SetEventCyclic($reseteid, 2 /*täglich*/, 1 /*alle 1 tage*/, 0, 0, 0 /*einmalig*/, 0);
+				IPS_SetEventCyclicTimeFrom($reseteid, 0, 1, 0); //resets the offset every day at 00:01:00
+				IPS_SetEventScript($reseteid, "IPS_SetEventCyclicTimeFrom($eid, 0, 1, 0);");
+				IPS_SetIdent($reseteid, 'resetRefreshTimer');
+				IPS_SetParent($reseteid, $this->InstanceID);
+				IPS_SetPosition($reseteid, 9990);
+				IPS_SetEventActive($reseteid, true);
+				IPS_SetHidden($reseteid, true);
+			}
+			else
+			{
+				$reseteid = IPS_GetObjectIDByIdent('resetRefreshTimer', $this->InstanceID);
+				IPS_SetName($reseteid, 'Refresh der Nächsten Aktualisierung');
+			}
+			
 
 		for($i = 0; $i < count($data); $i++)
 		{
