@@ -552,9 +552,11 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
 		
+			IPS_LogMessage("Should start creating", "the Timer here");
 		//add a timer that resets the weird issue with wrong offsets of time for the refresh timer
 			if(@IPS_GetObjectIDByIdent('resetRefreshTimer', $this->InstanceID) === false)
 			{	
+				IPS_LogMessage("Creates", "the Timer here");
 				$reseteid = IPS_CreateEvent(1 /*züklisch*/);
 				IPS_SetEventCyclic($reseteid, 2 /*täglich*/, 1 /*alle 1 tage*/, 0, 0, 0 /*einmalig*/, 0);
 				IPS_SetEventCyclicTimeFrom($reseteid, 0, 1, 0); //resets the offset every day at 00:01:00
