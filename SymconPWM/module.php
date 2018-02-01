@@ -1,7 +1,7 @@
 <?
 class PWM extends IPSModule {
 	
-	//Test branch
+	//master branch
 
 	protected function CreateProfile($profile, $type, $min, $max, $steps, $digits = 0, $prefix = "", $suffix = "", $icon = "")
 	{
@@ -36,7 +36,6 @@ class PWM extends IPSModule {
 		if(@IPS_GetObjectIDByIdent($ident, $parent) === false)
 		{
 			$eid = IPS_CreateEvent(1 /*züklisch*/);
-			IPS_SetName($eid, $name);
 			IPS_SetParent($eid, $parent);
 			IPS_SetIdent($eid, $ident);
 			IPS_SetEventScript($eid, $script);
@@ -45,6 +44,7 @@ class PWM extends IPSModule {
 		{
 			$eid = IPS_GetObjectIDByIdent($ident, $parent);
 		}
+		IPS_SetName($eid, $name);
 		return $eid;
 	}
 
@@ -118,7 +118,7 @@ class PWM extends IPSModule {
 			IPS_SetVariableProfileAssociation("PWM.Selector", 0, "Komfort", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 1, "Reduziert", "", -1);
 			IPS_SetVariableProfileAssociation("PWM.Selector", 2, "Solar/PV", "", -1);
-			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", '');
+			IPS_SetVariableProfileAssociation("PWM.Selector", 3, "Urlaub", "", -1);
 		}
 
 		//Swtich Profil erstellen
@@ -534,7 +534,7 @@ if (\$IPS_SENDER == \"WebFront\")
 				$var['trigger'] = 0.1;
 
 		//refresh timer
-			$eName = "Nächste Aktuallisierung";
+			$eName = "Nächste Aktualisierung";
 			$eIdent = "refreshTimer";
 			$eScript = "PWM_refresh(". $this->InstanceID .");";
 			$eid = $this->CreateTimer($eName, $eIdent, $eScript);
@@ -551,6 +551,28 @@ if (\$IPS_SENDER == \"WebFront\")
 			IPS_SetEventCyclic($eid, 0 /* Keine Datumsüberprüfung */, 0, 0, 0, 1 /* Sekündlich */, $var['interval'] * 60);
 			IPS_SetEventActive($eid, true);
 			IPS_SetHidden($eid, false);
+		
+			IPS_LogMessage("Should start creating", "the Timer here");
+		//add a timer that resets the weird issue with wrong offsets of time for the refresh timer
+			if(@IPS_GetObjectIDByIdent('resetRefreshTimer', $this->InstanceID) === false)
+			{	
+				IPS_LogMessage("Creates", "the Timer here");
+				$reseteid = IPS_CreateEvent(1 /*züklisch*/);
+				IPS_SetEventCyclic($reseteid, 2 /*täglich*/, 1 /*alle 1 tage*/, 0, 0, 0 /*einmalig*/, 0);
+				IPS_SetEventCyclicTimeFrom($reseteid, 0, 1, 0); //resets the offset every day at 00:01:00
+				IPS_SetEventScript($reseteid, "IPS_SetEventCyclicTimeFrom($eid, 0, 1, 0);");
+				IPS_SetIdent($reseteid, 'resetRefreshTimer');
+				IPS_SetParent($reseteid, $this->InstanceID);
+				IPS_SetPosition($reseteid, 9990);
+				IPS_SetEventActive($reseteid, true);
+				IPS_SetHidden($reseteid, true);
+			}
+			else
+			{
+				$reseteid = IPS_GetObjectIDByIdent('resetRefreshTimer', $this->InstanceID);
+				IPS_SetName($reseteid, 'Refresh der Nächsten Aktualisierung');
+			}
+			
 
 		for($i = 0; $i < count($data); $i++)
 		{
