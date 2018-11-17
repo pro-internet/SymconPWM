@@ -140,7 +140,7 @@ class PWM extends IPSModule {
 			IPS_SetHidden($sid, true);	
 			IPS_SetScriptContent($sid, "<?
 
-if (\$IPS_SENDER == \"WebFront\") 
+if (\$_IPS['SENDER'] == \"WebFront\") 
 { 
     SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']); 
 } 
