@@ -9,7 +9,7 @@
 		"add": true,
 		"delete": true,
 		"sort": {
-			"column": "name",
+			"column": "Raumname",
 			"direction": "ascending"
 		},
 		"columns": [{
